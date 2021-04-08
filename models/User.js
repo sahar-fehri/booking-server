@@ -26,10 +26,6 @@ var userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    privateKey: {
-        type: String,
-        required: true
-    },
     date: {
         type: Date,
         defaule: Date.now
@@ -39,7 +35,6 @@ var userSchema = new mongoose.Schema({
 userSchema.methods.toJSON = function() {
     var obj = this.toObject();
     delete obj.password;
-    delete obj.privateKey;
     delete obj.__v;
     return obj;
 };

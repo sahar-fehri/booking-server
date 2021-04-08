@@ -3,9 +3,8 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {registerValidation, loginValidation} = require ('../validation');
-const Provider = require('../config/provider')
-const provider = new Provider()
-const web3 = provider.web3
+var WebProvider = require('../config/provider');
+var web3 = new WebProvider().getInstance().web3;
 
 
 
@@ -26,8 +25,13 @@ router.post('/register', async (req, res) =>{
     const salt = await bcrypt.genSalt(10);
     const hashedPWD = await bcrypt.hash(req.body.password, salt);
 
-    let account = web3.eth.accounts.create();
-    console.log('newww account generated', account)
+    const accounts = await web3.eth.getAccounts();
+    let numberCurrentUsersInDB = await User.countDocuments();
+    console.log('number of users', numberCurrentUsersInDB);
+    console.log('here', accounts[numberCurrentUsersInDB+1])
+
+    //let account = web3.eth.accounts.create();
+    //console.log('newww account generated', account)
 
 
     const user = new User({
@@ -35,8 +39,8 @@ router.post('/register', async (req, res) =>{
         email: req.body.email,
         password: hashedPWD,
         company: req.body.company,
-        address: account.address,
-        privateKey: account.privateKey
+        address: accounts[numberCurrentUsersInDB],
+
     });
 
     try{

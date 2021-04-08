@@ -5,7 +5,7 @@ const mongoose  = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
-//const Provider = require('./config/provider')
+
 const {subscribeLogEvent, deployBookingContract} = require('./blockchain/blockchain')
 
 const {COLA, PEPSI, EVENT_NAMES}  = require ('./utils/constants');
@@ -15,22 +15,19 @@ const {
     expectRevert, // Assertions for transactions that should fail
 } = require('@openzeppelin/test-helpers');
 
-//const provider = new Provider()
-//const myProvider = provider.provider
 
-//const web3 = provider.web3
 
 
 //Importing routes
 const authRoute = require('./routes/auth');
-const userRoute = require('./routes/user');
+const roomRoute = require('./routes/room');
 
 //Middlewares for routes
 
 app.use(express.json());
 app.use(cors());
 app.use('/api', authRoute);
-app.use('/api/user', userRoute);
+app.use('/api/room', roomRoute);
 
 
 
@@ -50,10 +47,11 @@ app.use('/api/user', userRoute);
 
     try{
         let instance = await deployBookingContract();
-        console.log(instance.address)
+       
         for(let event of EVENT_NAMES){
             subscribeLogEvent(instance, event);
         }
+
       //  let receipt = await instance.book(ID_COLA, MAP_COLA[1], startHex, endHex, idSlot, {from: accounts[0], gas: "220000"})
        // console.log(receipt)
 

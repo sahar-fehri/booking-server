@@ -4,20 +4,27 @@ pragma solidity >=0.4.24;
 contract Booking {
 
     struct Slot {
-        uint256 idSlot;
+        bytes32 idSlot;
         uint256 status; // if 0 means vacant if 1 means occupied
         bytes32 start;
         bytes32 end;
     }
+
+    struct Appointment{
+        bytes32 idSlot;
+        bytes32 idCompany;
+    }
+
 
     mapping(bytes32 => Slot[])  rooms;
     mapping(bytes32 => mapping(bytes32 => uint)) colaExists;
     mapping(bytes32 => mapping(bytes32 => uint)) pepsiExists;
     mapping(bytes32 => Slot[])  ColaRooms; // string is the ID of the room
     mapping(bytes32 => Slot[]) PepsiRooms;
-    mapping(uint256 => uint256) slotAvailibilities; // slotID is unique for both companies so here we keep track of status
-                                                    // because it is simpler than loopin on ColaRooms mapping to check
-                                                    //if it is available
+    mapping(bytes32 => bool) slotAvailibilities;
+    mapping(bytes32 => bool ) isAvailable;
+    mapping(bytes32 => Appointment ) availabilities;
+
 
     bytes32 [10] public COLA;
     bytes32 [10] public PEPSI;
@@ -25,17 +32,39 @@ contract Booking {
     bytes32 constant company_cola = "COLA";
    
 
-    event Book(bytes32 idCompany, bytes32 idRoom, bytes32 start, bytes32 end, uint256 idSlot);
-    event Cancel(bytes32 idCompany, bytes32 idRoom, bytes32 start, bytes32 end, uint256 idSlot);
+    event Book(bytes32 idCompany, bytes32 idRoom, bytes32 start, bytes32 end, bytes32 idSlot);
+    event Cancel(bytes32 idCompany, bytes32 idRoom, bytes32 start, bytes32 end, bytes32 idSlot);
+    event SLOT(bytes32 id, bool value);
 
-    modifier onlyWhenAvailable(uint256 _idSlot)
+     uint256 x;
+     event Done(uint256 value);
+
+    modifier onlyWhenAvailable(bytes32 id)
     {
         require(
-            slotAvailibilities[_idSlot] == 0, // even if key does not exist we will have default value 0 (canceled/not yet booked)
-            "Not Available."
+            slotAvailibilities[id] == false,
+            "Room Not Available."
         );
         _;
     }
+
+    modifier onlyWhenExists(bytes32 id)
+        {
+            require(
+                availabilities[id].idSlot == 0,
+                "ALREADY EXIST"
+            );
+            _;
+        }
+
+    modifier onlyIfExists(bytes32 id)
+        {
+            require(
+                isAvailable[id] == false,
+                "ALREADY EXIST"
+            );
+            _;
+        }
 
     constructor( bytes32 [10] memory _cola, bytes32 _idCola,  bytes32 [10] memory _pepsi, bytes32 _idPepsi) public{
         COLA = _cola;
@@ -54,25 +83,37 @@ contract Booking {
 
 
 
-    function book(bytes32  idCompany, bytes32  idRoom, bytes32  start, bytes32  end, uint256 idSlot) external onlyWhenAvailable(idSlot){
+    function book(bytes32  idCompany, bytes32  idRoom, bytes32  start, bytes32  end, bytes32 idSlot) external  {
         //make a require to check if roomID exists
-        require(colaExists[idCompany][idRoom] ==1 || pepsiExists[idCompany][idRoom] ==1);
+        emit SLOT(idSlot, slotAvailibilities[idSlot]);
+        //TODO return this onlyWhenAvailable(idSlot)
+
+        require(colaExists[idCompany][idRoom] ==1 || pepsiExists[idCompany][idRoom] ==1, "ROOM DOES NOT EXIST");
         Slot memory slot = Slot(idSlot, 1, start, end);
-        slotAvailibilities[idSlot] = 1;
+        slotAvailibilities[idSlot] = true;
         rooms[idRoom].push(slot);
         emit Book(idCompany, idRoom, start, end, idSlot);
+
+
     }
 
-    function cancel(bytes32  idCompany, bytes32  idRoom, bytes32  start, bytes32  end, uint256  idSlot) external{
+    function cancel(bytes32  idCompany, bytes32  idRoom, bytes32  start, bytes32  end, bytes32  idSlot) external{
         require(colaExists[idCompany][idRoom] ==1 || pepsiExists[idCompany][idRoom] ==1);
         Slot memory slot = Slot(idSlot, 0, "", "");
         rooms[idRoom].push(slot);
-        slotAvailibilities[idSlot] = 0;
+        slotAvailibilities[idSlot] = false;
         emit Cancel(idCompany, idRoom, start, end, idSlot);
      }
 
 
+      function test (bytes32 idCompany, bytes32 idSlot) public   {
+       // emit SLOT(id, isAvailable[id]);
+      //  isAvailable[id] = true;
+      //   require(availabilities[idCompany].idSlot == 0,"ALREADY EXIST !!!");
+         availabilities[idCompany].idCompany = idCompany;
+         availabilities[idCompany].idSlot = idSlot;
 
+      }
 
 
 }
