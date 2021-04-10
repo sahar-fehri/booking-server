@@ -19,7 +19,7 @@ contract Booking {
     mapping(bytes32 => Slot[])  rooms;
     mapping(bytes32 => mapping(bytes32 => uint)) colaExists;
     mapping(bytes32 => mapping(bytes32 => uint)) pepsiExists;
-    mapping(bytes32 => Slot[])  ColaRooms; // string is the ID of the room
+    mapping(bytes32 => Slot[])  ColaRooms; // bytes32 is the ID of the room
     mapping(bytes32 => Slot[]) PepsiRooms;
     mapping(bytes32 => bool) slotAvailibilities;
     mapping(bytes32 => bool ) isAvailable;
@@ -32,8 +32,8 @@ contract Booking {
     bytes32 constant company_cola = "COLA";
    
 
-    event Book(bytes32 idCompany, bytes32 idRoom, bytes32 start, bytes32 end, bytes32 idSlot);
-    event Cancel(bytes32 idCompany, bytes32 idRoom, bytes32 start, bytes32 end, bytes32 idSlot);
+    event Book(bytes32 idCompany, bytes32 resourceId, bytes32 start, bytes32 end, bytes32 idSlot);
+    event Cancel(bytes32 idCompany, bytes32 resourceId, bytes32 start, bytes32 end, bytes32 idSlot);
     event SLOT(bytes32 id, bool value);
 
      uint256 x;
@@ -83,26 +83,26 @@ contract Booking {
 
 
 
-    function book(bytes32  idCompany, bytes32  idRoom, bytes32  start, bytes32  end, bytes32 idSlot) external  {
+    function book(bytes32  idCompany, bytes32  resourceId, bytes32  start, bytes32  end, bytes32 idSlot) external onlyWhenAvailable(idSlot)  {
         //make a require to check if roomID exists
         emit SLOT(idSlot, slotAvailibilities[idSlot]);
         //TODO return this onlyWhenAvailable(idSlot)
 
-        require(colaExists[idCompany][idRoom] ==1 || pepsiExists[idCompany][idRoom] ==1, "ROOM DOES NOT EXIST");
+        require(colaExists[idCompany][resourceId] ==1 || pepsiExists[idCompany][resourceId] ==1, "ROOM DOES NOT EXIST");
         Slot memory slot = Slot(idSlot, 1, start, end);
         slotAvailibilities[idSlot] = true;
-        rooms[idRoom].push(slot);
-        emit Book(idCompany, idRoom, start, end, idSlot);
+        rooms[resourceId].push(slot);
+        emit Book(idCompany, resourceId, start, end, idSlot);
 
 
     }
 
-    function cancel(bytes32  idCompany, bytes32  idRoom, bytes32  start, bytes32  end, bytes32  idSlot) external{
-        require(colaExists[idCompany][idRoom] ==1 || pepsiExists[idCompany][idRoom] ==1);
+    function cancel(bytes32  idCompany, bytes32  resourceId, bytes32  start, bytes32  end, bytes32  idSlot) external{
+        require(colaExists[idCompany][resourceId] ==1 || pepsiExists[idCompany][resourceId] ==1);
         Slot memory slot = Slot(idSlot, 0, "", "");
-        rooms[idRoom].push(slot);
+        rooms[resourceId].push(slot);
         slotAvailibilities[idSlot] = false;
-        emit Cancel(idCompany, idRoom, start, end, idSlot);
+        emit Cancel(idCompany, resourceId, start, end, idSlot);
      }
 
 

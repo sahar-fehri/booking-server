@@ -1,7 +1,7 @@
 let mongoose = require ('mongoose');
-
+const {Status}  = require ('../utils/constants');
 var roomSchema = new mongoose.Schema({
-    idRoom: {
+    resourceId: {
         type: String,
         required: true
     },
@@ -10,12 +10,12 @@ var roomSchema = new mongoose.Schema({
         required: true
     },
     start: {
-        type: String,
+        type: Number,
         required: true,
 
     },
     end: {
-        type: String,
+        type: Number,
         required: true,
 
     },
@@ -35,6 +35,11 @@ var roomSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    title: {
+        type: String,
+        required: true,
+
+    }
 })
 
 roomSchema.methods.toJSON = function() {
@@ -45,3 +50,15 @@ roomSchema.methods.toJSON = function() {
 
 const Room = mongoose.model('Room', roomSchema);
 module.exports = Room;
+
+
+module.exports.getAllAvailibilitiesByCompany = async (idCompany) =>{
+    return await Room.find({company:  idCompany, status: Status.Booked});
+}
+
+module.exports.cancelRoom = async (idSlot) => {
+    console.log('here to cancell this', idSlot)
+    const query = {idSlot: idSlot};
+    const newvalues = { $set: {status: Status.Canceled } };
+    return await Room.updateOne(query, newvalues);
+}

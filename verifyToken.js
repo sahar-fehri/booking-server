@@ -1,15 +1,17 @@
-const jwt = require('jsonwebtoken');
+const jwt   = require('jsonwebtoken');
+const Utils = require('./utils/utils');
 
 //middleware fct to protect our private routes
 module.exports = function (req, res, next) {
     const token = req.header('auth-token');
-    if(!token) return res.status(401).send('Access denied');
+    //if(!token) return res.status(401).send('Access denied');
+    if(!token) return  Utils.getJsonResponse('error',401, "Access denied", '', res);
 
     try{
         const verified = jwt.verify(token, process.env.TOKEN_SECRET);
         req.user = verified;
         next();
     } catch(err){
-        res.status(400).send('INVALID TOKEN');
+        return Utils.getJsonResponse('error',400, "INVALID Token", '', res);
     }
 }

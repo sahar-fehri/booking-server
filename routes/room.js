@@ -1,64 +1,63 @@
-const router = require('express').Router();
-const verify = require('../verifyToken');
-const User = require('../models/User');
-const Room = require('../models/Room');
+const router    = require('express').Router();
+const verify    = require('../verifyToken');
+const User      = require('../models/User');
+const Room      = require('../models/Room');
+const Contract  = require('../blockchain/contract');
 var WebProvider = require('../config/provider');
-var web3 = new WebProvider().getInstance().web3;
-var provider = new WebProvider().getInstance().provider;
-const booking_artifact = require('../app/build/contracts/Booking.json');
-const contract = require("@truffle/contract");
-let Booking = contract(booking_artifact);
-Booking.setProvider(provider);
-const {
-    BN,
-    expectEvent,  // Assertions for emitted events
-    expectRevert, // Assertions for transactions that should fail
-} = require('@openzeppelin/test-helpers');
-const confirmationNumber=5;
+var web3        = new WebProvider().getInstance().web3;
+var provider    = new WebProvider().getInstance().provider;
+const Utils     = require('../utils/utils');
+const {Status}  = require ('../utils/constants');
 
-const {COLA, PEPSI, EVENT_NAMES, Status}  = require ('../utils/constants');
-const Contract = require('../blockchain/contract')
+
+
+const confirmationNumber=5; // could be used to count number of conf needed once tx is sent on blockchain
 
 router.post('/book',verify, async (req, res) => {
     //Fetch
-    const accounts = await web3.eth.getAccounts()
     const user = await User.findById(req.user._id);
-
+    console.log('user', user)
     web3.eth.handleRevert = true;
    try{
        const instance = await Contract.initContract();
+       let {resource, start, end, eventName} = req.body;
+       let idSlot = getIdSlot(start, resource, user.company);
        instance.methods.book(
            getHex(user.company),
-           getHex(req.body.resource),
-           getHex(req.body.start),
-           getHex(req.body.end),
-           getHex(req.body.eventName)).send({ from: user.address,  gas: "220000" })
+           getHex(resource),
+           getHex(start),
+           getHex(end),
+           getHex(idSlot)).send({ from: user.address,  gas: "220000" })
        .on('receipt', async (receipt)=>{
            console.log("receipt here !!", receipt)
            if(!receipt.events.Book){
-               return res.status(400).send("EVENT NOT FOUND")
+               return Utils.getJsonResponse('error',400, "EVENT NOT FOUND", '', res);
+               //return res.status(400).send("EVENT NOT FOUND")
            }else{
                console.log("here to save", receipt.events.Book.returnValues)
-               let {idCompany, idRoom, start, end, idSlot} = receipt.events.Book.returnValues;
+               let {idCompany, resourceId, start, end, idSlot} = receipt.events.Book.returnValues;
                const room = new Room({
-                   idRoom: getOriginalValue(idRoom),
+                   resourceId: getOriginalValue(resourceId),
                    idSlot: getOriginalValue(idSlot),
-                   start: getOriginalValue(start),
-                   end: getOriginalValue(end),
+                   start: Number(getOriginalValue(start)),
+                   end: Number(getOriginalValue(end)),
                    company: getOriginalValue(idCompany),
                    user: receipt.from ,
                    hash: receipt.transactionHash,
-                   status: Status.Booked
+                   status: Status.Booked,
+                   title: eventName
                })
-
+               console.log('original value start', getOriginalValue(start) )
+               console.log(Number(getOriginalValue(start)))
                console.log('room finally in db', room)
                try{
                    const savedRoom= await room.save();
-                 //  const single = await Room.findOne({idRoom: getOriginalValue(idRoom)});
-                   res.send("Successful Booking");
+                 //  const single = await Room.findOne({resourceId: getOriginalValue(resourceId)});
+                   let result = await Room.getAllAvailibilitiesByCompany(user.company);
+                   return Utils.getJsonResponse('ok',200,'', result, res);
                } catch(err){
                    console.log(err)
-                   res.status(400).send(err);
+                   return Utils.getJsonResponse('error',400, err, '', res);
                }
 
            }
@@ -68,9 +67,9 @@ router.post('/book',verify, async (req, res) => {
            console.log('error here !!!! ')
            console.log(error.data)
            if(error.reason){
-               return res.status(400).send(error.reason)
+               return Utils.getJsonResponse('error',400, error.reason, '', res);
            }else{
-               return res.status(400).send(error)
+               return Utils.getJsonResponse('error',400, error, '', res);
            }
        });
 
@@ -79,38 +78,82 @@ router.post('/book',verify, async (req, res) => {
        console.log("web3.eth.handleRevert =", web3.eth.handleRevert)
        console.error(err);
        console.log("err.message =",err.message);
+       return Utils.getJsonResponse('error',400, err, '', res);
+    }
+
+})
+
+
+router.post('/cancel',verify, async (req, res) => {
+    //Fetch
+    const user = await User.findById(req.user._id);
+    console.log('user', user)
+    web3.eth.handleRevert = true;
+    try{
+        const instance = await Contract.initContract();
+        let {resource, start, end, eventName} = req.body;
+        let idSlot = getIdSlot(start, resource, user.company);
+        instance.methods.cancel(
+            getHex(user.company),
+            getHex(resource),
+            getHex(start),
+            getHex(end),
+            getHex(idSlot)).send({ from: user.address,  gas: "220000" })
+            .on('receipt', async (receipt)=>{
+                console.log("receipt here !!", receipt)
+                if(!receipt.events.Cancel){
+                    return Utils.getJsonResponse('error',400, "EVENT Cancel NOT FOUND", '', res);
+                    //return res.status(400).send("EVENT NOT FOUND")
+                }else{
+                   // console.log("here to save", receipt.events.Cancel.returnValues)
+                    let {idSlot} = receipt.events.Cancel.returnValues;
+                    //update the booked event to cancelled
+                    try{
+                        const cancelled= await Room.cancelRoom(getOriginalValue(idSlot));
+                        console.log('canceeleeed', cancelled)
+                        //  const single = await Room.findOne({resourceId: getOriginalValue(resourceId)});
+                        let result = await Room.getAllAvailibilitiesByCompany(user.company);
+                        return Utils.getJsonResponse('ok',200,'', result, res);
+                    } catch(err){
+                        console.log(err)
+                        return Utils.getJsonResponse('error',400, err, '', res);
+                    }
+
+                }
+
+            })
+            .on('error', function(error, receipt) {
+                console.log('error here !!!! ')
+                console.log(error.data)
+                if(error.reason){
+                    return Utils.getJsonResponse('error',400, error.reason, '', res);
+                }else{
+                    return Utils.getJsonResponse('error',400, error, '', res);
+                }
+            });
+
+    }catch(err){
+        console.log('err in catch')
+        console.log("web3.eth.handleRevert =", web3.eth.handleRevert)
+        console.error(err);
+        console.log("err.message =",err.message);
+        return Utils.getJsonResponse('error',400, err, '', res);
     }
 
 })
 
 router.get('/availibilities',verify, async (req, res) => {
-    //Fetch
-    const accounts = await web3.eth.getAccounts()
     const user = await User.findById(req.user._id);
 
     try{
         console.log(user.company)
-
-        const events = await Room.find({company:  user.company});
-        console.log('here', events)
-        /*
-        [{
-            title : "koko", //idSlot
-            start : new Date('07 April 2021 10:00 UTC'),
-            resourceId : "CO1", //idRoom
-            end : new Date('07 April 2021 11:00 UTC'),
-            color: '#31A537',
-            textColor: 'black',
-            borderColor: 'lightGray'
-            }]
-         */
-        console.log(user.company)
-        res.send('ok')
+        let result = await Room.getAllAvailibilitiesByCompany(user.company);
+        console.log('here', result)
+        return Utils.getJsonResponse('ok',200,'', result, res);
 
     }catch(err){
-
         console.error(err);
-        return res.status(400).send(error)
+        return Utils.getJsonResponse('error',400, err, '', res);
     }
 
 })
@@ -122,6 +165,10 @@ const getHex = (arg) => {
 
 const getOriginalValue = (hex) => {
     return web3.utils.hexToUtf8(hex);
+}
+
+const getIdSlot=(start, resourceId, idCompany) =>{
+    return start+resourceId+idCompany;
 }
 
 
