@@ -46,3 +46,6 @@ app.use('/api/room', roomRoute);
 app.listen(3000, ()=> {
     console.log('server running')
 })
+
+
+module.exports = app;

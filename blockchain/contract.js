@@ -24,40 +24,35 @@ const newIDCOM= web3.utils.asciiToHex("COLA").padEnd(66, "0")
 const newIDSLOT= web3.utils.asciiToHex("momo").padEnd(66, "0")
 
 class Contract {
-  /*  constructor() {
-        this.web3 = web3
-    }
-
-   */
     // create contract instance
     static async initContract() {
         const instance = new Web3EthContract(ABI, ADDRESS);
        // const instance =  new this.web3.eth.Contract(ABI, ADDRESS)
-        console.log('here ur address', ADDRESS)
-        let accounts = await web3.eth.getAccounts()
-        /*  try{
+        /*   console.log('here ur address', ADDRESS)
+          let accounts = await web3.eth.getAccounts()
+           try{
 
-           instance.methods.book(ID_COLA, MAP_COLA[1], startHex, endHex, idSlot)
-               .send({ from: accounts[0],  gas: "220000" })
-               .then((receipt) => console.log(receipt.transactionHash))
+             instance.methods.book(ID_COLA, MAP_COLA[1], startHex, endHex, idSlot)
+                 .send({ from: accounts[0],  gas: "220000" })
+                 .then((receipt) => console.log(receipt.transactionHash))
 
 
-           //  instance.methods.book(ID_COLA, MAP_COLA[1], startHex, endHex, newIDSLOT).send({ from: accounts[0],  gas: "220000" })
+             //  instance.methods.book(ID_COLA, MAP_COLA[1], startHex, endHex, newIDSLOT).send({ from: accounts[0],  gas: "220000" })
 
-           instance.methods.test(newIDCOM, newIDSLOT).send({ from: accounts[0],  gas: "220000" })
-               .on('receipt', function(receipt){
-                   console.log("receipt here !!", receipt)
-               })
-               .on('transactionHash', function(hash){
-                   console.log( "hash here", hash)
-               })
-               .on('error', function(error, receipt) {
-                   console.log('error')
-                   console.log(error.data)
-               });
-        }catch(errr){
-            console.log('er', errr)
-        }*/
+             instance.methods.test(newIDCOM, newIDSLOT).send({ from: accounts[0],  gas: "220000" })
+                 .on('receipt', function(receipt){
+                     console.log("receipt here !!", receipt)
+                 })
+                 .on('transactionHash', function(hash){
+                     console.log( "hash here", hash)
+                 })
+                 .on('error', function(error, receipt) {
+                     console.log('error')
+                     console.log(error.data)
+                 });
+          }catch(errr){
+              console.log('er', errr)
+          }*/
         return instance
     }
 }

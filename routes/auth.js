@@ -5,6 +5,10 @@ const jwt       = require('jsonwebtoken');
 const Utils     = require('../utils/utils');
 var WebProvider = require('../config/provider');
 var web3        = new WebProvider().getInstance().web3;
+//const mutexify  = require('mutexify');
+//const lock      = mutexify();
+var Mutex = require('async-mutex').Mutex;
+const mutex = new Mutex();
 
 const {registerValidation, loginValidation} = require ('../validation');
 
@@ -47,9 +51,16 @@ router.post('/register', async (req, res) =>{
     });
 
     try{
-        const savedUser= await user.save();
-        //res.send(savedUser);
-        return Utils.getJsonResponse('ok',200,'', savedUser, res);
+       /// let savedUser;
+   //     mutex
+    //        .acquire()
+    //        .then(async (release)=> {
+              const savedUser= await user.save();
+                //res.send(savedUser);
+                return Utils.getJsonResponse('ok',200,'', savedUser, res);
+  //              release();
+   //         });
+
     } catch(err){
         console.log(err)
         //res.status(400).send(err);
