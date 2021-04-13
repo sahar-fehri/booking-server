@@ -13,6 +13,7 @@
     "@hapi/joi": "^17.1.1",
     "@openzeppelin/test-helpers": "^0.5.10",
     "@truffle/contract": "^4.2.26-abi-utils.0",
+    "amqplib": "^0.7.1",
     "async-mutex": "^0.3.1",
     "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",

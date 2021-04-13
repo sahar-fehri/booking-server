@@ -4,6 +4,7 @@ const db = require ('./config/db');
 const mongoose  = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
+const rabbit = require('./config/rabbit');
 
 
 const {subscribeLogEvent, deployBookingContract} = require('./blockchain/blockchain')
@@ -28,8 +29,13 @@ app.use(cors());
 app.use('/api', authRoute);
 app.use('/api/room', roomRoute);
 
+/*
+    the producer and consumer setup is not quite finished , the booking process
+    is supposed to be moved to the consumer
 
 
+ */
+rabbit.setup();
 (async () => {
     try{
         let instance = await deployBookingContract();
