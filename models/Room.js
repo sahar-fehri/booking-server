@@ -1,5 +1,6 @@
 let mongoose = require ('mongoose');
 const {Status}  = require ('../utils/constants');
+const Schema    = mongoose.Schema;
 var roomSchema = new mongoose.Schema({
     resourceId: {
         type: String,
@@ -39,7 +40,11 @@ var roomSchema = new mongoose.Schema({
         type: String,
         required: true,
 
-    }
+    },
+    tx:{
+        type: Schema.Types.ObjectId, ref: 'Transaction',
+        required: false
+    },
 })
 
 roomSchema.methods.toJSON = function() {
@@ -57,7 +62,6 @@ module.exports.getAllAvailibilitiesByCompany = async (idCompany) =>{
 }
 
 module.exports.cancelRoom = async (idSlot) => {
-    console.log('here to cancell this', idSlot)
     const query = {idSlot: idSlot};
     const newvalues = { $set: {status: Status.Canceled } };
     return await Room.updateOne(query, newvalues);

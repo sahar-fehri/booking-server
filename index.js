@@ -4,7 +4,7 @@ const db = require ('./config/db');
 const mongoose  = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-const rabbit = require('./config/rabbit');
+
 
 
 const {subscribeLogEvent, deployBookingContract} = require('./blockchain/blockchain')
@@ -35,7 +35,8 @@ app.use('/api/room', roomRoute);
 
 
  */
-rabbit.setup();
+
+
 (async () => {
     try{
         let instance = await deployBookingContract();

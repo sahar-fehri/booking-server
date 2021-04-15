@@ -5,6 +5,11 @@ const Status = { //should have been an enum with ts, maybe fix
     Booked :'booked',
     Canceled : 'canceled'
 }
+const TX_Status = { //should have been an enum with ts, maybe fix
+    Pending :'pending',
+    Confirmed : 'confirmed',
+    Cancelled : 'cancelled'
+}
 
 
-module.exports = {COLA, PEPSI, EVENT_NAMES, Status};
+module.exports = {COLA, PEPSI, EVENT_NAMES, Status, TX_Status};
