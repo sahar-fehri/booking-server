@@ -15,7 +15,7 @@ const {Status, TX_Status}  = require ('../utils/constants');
 const messageQueueConnectionString = process.env.RABBITMQ_URL;
 
 const confirmationNumber=5; // could be used to count number of conf needed once tx is sent on blockchain
-let lastRequestId = 555;
+
 
 const MessageBroker = require('../broker');
 
@@ -50,7 +50,62 @@ router.post('/book',verify, async (req, res) => {
 
 })
 
+router.post('/cancel',verify, async (req, res) => {
+    const user = await User.findById(req.user._id);
+    console.log('user', user)
 
+    try{
+
+        let {resource, start, end, eventName} = req.body;
+        let idSlot = getIdSlot(start, resource, user.company);
+        let found = await Room.isBooked(idSlot, Status.Booked, user.company);
+        console.log('founnd', found)
+        if(!found){
+            return Utils.getJsonResponse('error',400, 'Room has to be booked to be able to cancel it', '', res);
+        }
+        const transaction = new Transaction({
+            user: user._id,
+            idSlot: getIdSlot(start, resource, user.company),
+            status: TX_Status.Pending,
+        })
+        const savedTx = await transaction.save();
+        const broker = await MessageBroker.getInstance();
+        let requestId = savedTx._id;
+        let requestData = req.body;
+
+        await publishToChannel(broker.cancelChannel, { routingKey: "cancel", exchangeName: "processing", data: { requestId, requestData } });
+        console.log("Published a request message, requestId:", requestId);
+
+        return Utils.getJsonResponse('ok',200,'', requestId, res);
+
+    }catch(err){
+        console.error(err);
+        return Utils.getJsonResponse('error',400, err, '', res);
+    }
+
+})
+
+
+
+router.get('/availibilities',verify, async (req, res) => {
+    const user = await User.findById(req.user._id);
+
+    try{
+        console.log(user.company)
+        let result = await Room.getAllAvailibilitiesByCompany(user.company);
+        console.log('here', result)
+        return Utils.getJsonResponse('ok',200,'', result, res);
+
+    }catch(err){
+        console.error(err);
+        return Utils.getJsonResponse('error',400, err, '', res);
+    }
+
+})
+
+
+/*
+//old code of cancel endpoint
 router.post('/cancel',verify, async (req, res) => {
     //Fetch
     const user = await User.findById(req.user._id);
@@ -108,85 +163,6 @@ router.post('/cancel',verify, async (req, res) => {
     }
 
 })
-
-router.get('/availibilities',verify, async (req, res) => {
-    const user = await User.findById(req.user._id);
-
-    try{
-        console.log(user.company)
-        let result = await Room.getAllAvailibilitiesByCompany(user.company);
-        console.log('here', result)
-        return Utils.getJsonResponse('ok',200,'', result, res);
-
-    }catch(err){
-        console.error(err);
-        return Utils.getJsonResponse('error',400, err, '', res);
-    }
-
-})
-
-//TODO: replace old cancel endpoint with new one using rabbitMQ
-router.post('/testcancel',verify, async (req, res) => {
-    const user = await User.findById(req.user._id);
-    console.log('user', user)
-
-    try{
-
-        let {resource, start, end, eventName} = req.body;
-        const transaction = new Transaction({
-            user: user._id,
-            idSlot: getIdSlot(start, resource, user.company),
-            status: TX_Status.Pending,
-        })
-        const savedTx = await transaction.save();
-        const broker = await MessageBroker.getInstance();
-        let requestId = savedTx._id;
-        let requestData = req.body;
-
-        await publishToChannel(broker.cancelChannel, { routingKey: "cancel", exchangeName: "processing", data: { requestId, requestData } });
-        console.log("Published a request message, requestId:", requestId);
-
-        return Utils.getJsonResponse('ok',200,'', requestId, res);
-
-    }catch(err){
-        console.error(err);
-        return Utils.getJsonResponse('error',400, err, '', res);
-    }
-
-})
-/*
-//old code of cancel endpoint
-router.post('/test',verify, async (req, res) => {
-    const user = await User.findById(req.user._id);
-    console.log('user', user)
-
-    try{
-
-        let {resource, start, end, eventName} = req.body;
-        const transaction = new Transaction({
-            user: user._id,
-            idSlot: getIdSlot(start, resource, user.company),
-            status: TX_Status.Pending,
-        })
-        const savedTx = await transaction.save();
-        console.log('saved tx', savedTx)
-        const broker = await MessageBroker.getInstance();
-
-        let requestId = savedTx._id;
-        let requestData = req.body;
-        console.log('reqq body', req.body)
-        await publishToChannel(broker.channel, { routingKey: "book", exchangeName: "processing", data: { requestId, requestData } });
-        console.log("Published a request message, requestId:", requestId);
-
-        return Utils.getJsonResponse('ok',200,'', requestId, res);
-
-    }catch(err){
-        console.error(err);
-        return Utils.getJsonResponse('error',400, err, '', res);
-    }
-
-})
-
 
  */
 /*

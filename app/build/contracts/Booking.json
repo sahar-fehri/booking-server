@@ -10604,10 +10604,123 @@
       "links": {},
       "address": "0xb599C5b5BD15d39571CD6E5FCBAc9973bA22B1ce",
       "transactionHash": "0xa77d4b359a6a74991d45eb6dabc29f4d3bad7e96fa9ba47717add50b28238a34"
+    },
+    "1618517050098": {
+      "events": {
+        "0x1ae79010d508d013e6e4aa048591055aaa1a3bd549ebea567187f6ebb655f22c": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "idCompany",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "resourceId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "start",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "end",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "idSlot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "Book",
+          "type": "event"
+        },
+        "0x322cbf5724c02f11f9825c070df5d8ef220a6019fbdf606f5131696c57f0d25c": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "idCompany",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "resourceId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "start",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "end",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "idSlot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "Cancel",
+          "type": "event"
+        },
+        "0x6bb841348c5a71169a2db8779d29699afa576c107c1bf7c33c3193ae1e980ba2": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "Done",
+          "type": "event"
+        },
+        "0x8c2d1ffd05da0c5f9fab35c576082c42bd75e8f4fa12fa08d1c725cad5a8b403": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "id",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "value",
+              "type": "bool"
+            }
+          ],
+          "name": "SLOT",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x9360E8f932c2cA45D0268112D46b8d2310b5031f",
+      "transactionHash": "0x6d6c48be08bb9fa5f9abf806851fee03f544875c2c5524ea0540d99dbca23a1f"
     }
   },
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-04-15T00:49:51.353Z",
+  "updatedAt": "2021-04-15T20:05:07.229Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}

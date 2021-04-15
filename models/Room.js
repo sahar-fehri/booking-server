@@ -66,3 +66,9 @@ module.exports.cancelRoom = async (idSlot) => {
     const newvalues = { $set: {status: Status.Canceled } };
     return await Room.updateOne(query, newvalues);
 }
+
+module.exports.isBooked = async (idSlot, status, idCompany) => {
+    const query = {company:  idCompany, status: status, idSlot: idSlot};
+    let res =  await Room.find(query);
+    return res.length == 0 ? false : true;
+}

@@ -31,31 +31,6 @@ const subscribeLogEvent = (instance, eventName) => {
                     log.data,
                     log.topics.slice(1)
                 )
-
-                /*   let {idCompany, idRoom, start, end, idSlot} = eventObj;
-                   const room = new Room({
-                       idRoom: getOriginalValue(idRoom),
-                       idSlot: getOriginalValue(idSlot),
-                       start: getOriginalValue(start),
-                       end: getOriginalValue(end),
-                       company: getOriginalValue(idCompany),
-                       user: log.address ,
-                       hash: log.transactionHash
-                   })
-
-                   console.log('room', room)
-                   try{
-                       const savedRoom= await room.save();
-                       const single = await Room.findOne({idRoom: getOriginalValue(idRoom)});
-                       console.log('founddddddddddd', single)
-                       console.log('founddddddddddd', single.idRoom)
-                   } catch(err){
-                       console.log(err)
-                       res.status(400).send(err);
-                   }
-
-               */
-
             }
         })
 

@@ -29,14 +29,6 @@ app.use(cors());
 app.use('/api', authRoute);
 app.use('/api/room', roomRoute);
 
-/*
-    the producer and consumer setup is not quite finished , the booking process
-    is supposed to be moved to the consumer
-
-
- */
-
-
 (async () => {
     try{
         let instance = await deployBookingContract();
