@@ -41,7 +41,7 @@ router.post('/book',verify, async (req, res) => {
         await publishToChannel(broker.channel, { routingKey: "book", exchangeName: "processing", data: { requestId, requestData } });
         console.log("Published a request message, requestId:", requestId);
 
-        return Utils.getJsonResponse('ok',200,'', requestId, res);
+        return Utils.getJsonResponse('ok',200,'', savedTx, res);
 
     }catch(err){
         console.error(err);
@@ -76,7 +76,7 @@ router.post('/cancel',verify, async (req, res) => {
         await publishToChannel(broker.cancelChannel, { routingKey: "cancel", exchangeName: "processing", data: { requestId, requestData } });
         console.log("Published a request message, requestId:", requestId);
 
-        return Utils.getJsonResponse('ok',200,'', requestId, res);
+        return Utils.getJsonResponse('ok',200,'', savedTx, res);
 
     }catch(err){
         console.error(err);

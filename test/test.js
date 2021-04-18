@@ -48,15 +48,14 @@ let room1 = {
     "resource": "CO2",
     "eventName": "koko"
 }
-
+/*
 describe("test###", () => {
     before(async () => {
         await User.deleteMany({});
         await Room.deleteMany({});
     });
 
-    /*************** Register User ***************/
-
+    
     describe('/POST register', () => {
         it('it should fail registering user1', async () => {
             for(const usr of arrayUsers){
@@ -127,6 +126,7 @@ describe("test###", () => {
 
 });
 
+*/
 
 
 function registerUsr(usr){
