@@ -1,4 +1,4 @@
-## Problem
+## Problem :star:
 
 The booking system has the following functionalities:
 
@@ -8,12 +8,12 @@ The booking system has the following functionalities:
 
 ● Users can cancel their own reservations
 
-## Solution Architecture
+## Solution Architecture :bulb:
 
 ![GitHub Logo](/images/archi.PNG)
 
 
-## Prerequisites
+## Prerequisites :white_check_mark:
 
 Ganache CLI v6.12.2
 
@@ -36,12 +36,12 @@ docker run --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-
 
 ````
 
-#### Terminal 1
-run ganache cli beforehand
+in another terminal : run ganache cli beforehand
 ````
 ganache-cli
 ````
 
+#### Terminal 1
 Compile and deploy smart contracts
 ````
 cd app; truffle migrate --reset --compile-all
