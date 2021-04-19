@@ -83,7 +83,7 @@ const executeBooking = async (reqID, data) => {
                 if(!receipt.events.Book){
                     //save error
                     await Transaction.updateTX(reqID, TX_Status.Cancelled)
-                    console.log("errorrr")
+                    console.log("ERROR")
                     //return Utils.getJsonResponse('error',400, "EVENT NOT FOUND", '', res);
                     //return res.status(400).send("EVENT NOT FOUND")
                 }else{
@@ -105,14 +105,11 @@ const executeBooking = async (reqID, data) => {
 
             })
             .on('error', async (error, receipt) => {
-                console.log('error here !!!! ')
-                console.log(error.data)
+                console.log('error', error.data)
                 await Transaction.updateTX(reqID, TX_Status.Cancelled)
             });
 
     }catch(err){
-        console.log('err in catch')
-        console.log("web3.eth.handleRevert =", web3.eth.handleRevert)
         console.error(err);
         console.log("err.message =",err.message);
         await Transaction.updateTX(reqID, TX_Status.Cancelled)

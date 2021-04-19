@@ -4,7 +4,6 @@ const Utils = require('./utils/utils');
 //middleware fct to protect our private routes
 module.exports = function (req, res, next) {
     const token = req.header('auth-token');
-    //if(!token) return res.status(401).send('Access denied');
     if(!token) return  Utils.getJsonResponse('error',401, "Access denied", '', res);
 
     try{
